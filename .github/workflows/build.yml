@@ -1,0 +1,89 @@
+name: Build Pipeline
+run-name: Commit - ${{ github.sha }} on ${{ github.ref_name }}
+
+jobs:
+    sast:
+        name: Running SAST [BearerCLI] on project
+        runs-on: ubuntu-latest 
+        steps: 
+          - name: Checkout code
+            uses: actions/checkout@v4
+          - name: Run Bearer SAST
+            uses: bearer/bearer-action@v2
+            with:
+              scanner: sast
+              quiet: true
+              format: json
+              output: ./SAST-results.json
+
+    sbom_generator:
+        name: Running Syft [SBOM generator] on project
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            - uses: anchore/sbom-action@v0
+              id: syft
+              with:
+                format: json
+
+    secret_detection:
+        name: Running Truffle-Hog on project
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            - name: Secret Scanning
+              id: truffleHog
+              uses: trufflesecurity/trufflehog@main
+              with:
+                exclude-paths: .git
+
+    sca:
+        name: Running Grype [SCA] on project
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+        - name: Run Anchore Scan
+          uses: anchore/scan-action@v6
+          id: grype
+          with:
+                path: "."
+                only-fixed: true
+                severity-cutoff: high
+                format: json
+
+    PublishOutput:
+      name: Publishing output of all Steps after basic Review
+      runs-on: ubuntu-latest
+      needs: [sast, sbom_generator, secret_detection, sca]
+      if: always()
+      steps:
+            - run: echo "Pushing Files into Reports Repo"
+            
+                
+    build:
+        name: Running Build
+        runs-on: ubuntu-latest
+        needs: [PublishOutput, sast, sbom_generator, secret_detection, sca] 
+        if: ${{ always() && needs.sast.result == 'success' && needs.sbom_generator.result == 'success' && needs.secret_detection.result == 'success' && needs.sca.result == 'success' }}
+        steps:
+            - run: echo "PR approved, Running Build"
+    #         - name: Checkout code
+    #           uses: actions/checkout@v4
+    #         - name: Set up SSH Key
+    #           uses: webfactory/ssh-agent@v0.9.0
+    #           with:
+    #             ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY}}
+    #         - name: Deploy
+    #           run:  rsync -avz --exclude '.git' --chown=github:www-data --chmod=Dg=rwx,Fg=rwx ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ vars.deploymentFolder }}
+    #         - name: Execute script on EC2
+    #           run: |
+    #               ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF' 
+    #                 chmod +x ${{ vars.deploymentFolder }}/${{ vars.deploymentFile }}
+    #                 /bin/bash ${{ vars.deploymentFolder }}/${{ vars.deploymentFile }}
+    #               EOF
+
+
+
