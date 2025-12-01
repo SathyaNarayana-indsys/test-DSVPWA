@@ -1,10 +1,15 @@
 name: Build Pipeline
 run-name: Commit - ${{ github.sha }} on ${{ github.ref_name }}
 
+env:
+  BREAK_ON_FAILURE_FLAG: false # Set to true or false
+
 jobs:
     sast:
         name: Running SAST [BearerCLI] on project
         runs-on: ubuntu-latest 
+        outputs:
+            report_path: ./SAST-results.json
         steps: 
           - name: Checkout code
             uses: actions/checkout@v4
@@ -19,6 +24,8 @@ jobs:
     sbom_generator:
         name: Running Syft [SBOM generator] on project
         runs-on: ubuntu-latest
+        outputs:
+            report_path: ./SBOM-results.json
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -26,10 +33,14 @@ jobs:
               id: syft
               with:
                 format: json
+            - name: Rename Syft Output
+              run: mv sbom.json ${{ job.outputs.report_path }}
 
     secret_detection:
         name: Running Truffle-Hog on project
         runs-on: ubuntu-latest
+        outputs:
+            report_path: Secrets-results.json # Define output for the report path
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -42,6 +53,8 @@ jobs:
     sca:
         name: Running Grype [SCA] on project
         runs-on: ubuntu-latest
+        outputs:
+            report_path: SCA-results.json # Define output for the report path
         steps:
         - name: Checkout code
           uses: actions/checkout@v4
@@ -60,14 +73,80 @@ jobs:
       needs: [sast, sbom_generator, secret_detection, sca]
       if: always()
       steps:
-            - run: echo "Pushing Files into Reports Repo"
-            
-                
+            # - run: echo "Pushing Files into Reports Repo"
+            -  name: checkout the reports repo
+               uses: actions/checkout@v4
+               with:
+                repository: ${{ vars.repo_link }}
+                path: reports-repo
+                token: ${{ secrets.REPORTS_REPO_PAT }}
+            -  name: Check if Current Repo exist else Create
+               id: checkFolder
+               env: 
+                REPO_NAME: ${{ github.event.repository.name }}
+               run: |
+                  echo "Checking Repo's existance"
+                  if [-d "reports-repo/$REPO_NAME" ]; then
+                    echo "folder exists"
+                  else
+                    echo "creating the folders"
+                    mkdir -p report-repo/$REPO_NAME
+                  fi
+            -  name: copy, commit and push changes
+               id: copy_reports
+               env:
+                SAST_REPORT: ${{ needs.sast.outputs.report_path }}
+                SBOM_REPORT: ${{ needs.sbom_generator.outputs.report_path }}
+                SECRET_REPORT: ${{ needs.secret_detection.outputs.report_path }}
+                SCA_REPORT: ${{ needs.sca.outputs.report_path }}
+                FOLDER: reports-repo/${{ github.event.repository.name }}
+               run: |
+                  echo "pushing files into reports Repo"
+
+                  cp $SAST_REPORT $FOLDER/sast-results.json
+                  cp $SBOM_REPORT $FOLDER/sbom-results.json
+                  cp $SECRET_REPORT $FOLDER/secrets-results.json
+                  cp $SCA_REPORT $FOLDER/sca-results.json
+                  
+                  cd reports-repo
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  if git diff --exit-code --quiet; then
+                    echo "No changes to commit."
+                  else
+                    git add .
+                    
+                    # Determine which files were changed/added (A or M status)
+                    CHANGED_FILES=$(git status --porcelain | grep '^[AM]' | awk '{print $2}' | xargs basename | tr '\n' ', ')
+                    # Remove trailing comma and space
+                    CHANGED_FILES="${CHANGED_FILES%, }"
+                    
+                    # Extract short branch name
+                    BRANCH_NAME=$(echo ${{ github.ref_name }} | sed 's/refs\/heads\///')
+                    
+                    # Create the custom commit message
+                    COMMIT_MESSAGE="Report Update: ${{ github.event.repository.name }}/${BRANCH_NAME} - Files: $CHANGED_FILES"
+                    
+                    git commit -m "$COMMIT_MESSAGE"
+                    git push
+                    echo "Successfully pushed report changes to the reports repository."
+                    echo "Commit Message: $COMMIT_MESSAGE"
+                  fi
+
     build:
         name: Running Build
         runs-on: ubuntu-latest
         needs: [PublishOutput, sast, sbom_generator, secret_detection, sca] 
-        if: ${{ always() && needs.sast.result == 'success' && needs.sbom_generator.result == 'success' && needs.secret_detection.result == 'success' && needs.sca.result == 'success' }}
+        if: |
+          ${{ 
+            env.BREAK_ON_FAILURE_FLAG == 'true' || 
+            (
+              needs.sast.result == 'success' && 
+              needs.sbom_generator.result == 'success' && 
+              needs.secret_detection.result == 'success' && 
+              needs.sca.result == 'success'
+            )
+          }}
         steps:
             - run: echo "PR approved, Running Build"
     #         - name: Checkout code
