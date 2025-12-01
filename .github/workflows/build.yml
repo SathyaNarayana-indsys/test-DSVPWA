@@ -137,9 +137,11 @@ jobs:
         name: Running Build
         runs-on: ubuntu-latest
         needs: [PublishOutput, sast, sbom_generator, secret_detection, sca] 
+        env:
+          FAILURE_FLAG = ${{ env.BREAK_ON_FAILURE_FLAG }}
         if: |
           ${{ 
-            ${{ env.BREAK_ON_FAILURE_FLAG }} == 'true' || 
+            ${{ jobs.build.steps.env }} == 'true' || 
             (
               needs.sast.result == 'success' && 
               needs.sbom_generator.result == 'success' && 
