@@ -13,8 +13,6 @@ jobs:
     sast:
         name: Running SAST [BearerCLI] on project
         runs-on: ubuntu-latest 
-        outputs:
-            report_path: ./SAST-results.json
         steps: 
           - name: Checkout code
             uses: actions/checkout@v4
@@ -24,22 +22,19 @@ jobs:
               scanner: sast
               quiet: true
               format: json
-              output: ./SAST-results.json
+              output: SAST-results.json
 
     sbom_generator:
         name: Running Syft [SBOM generator] on project
         runs-on: ubuntu-latest
-        outputs:
-            report_path: ./SBOM-results.json
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
             - uses: anchore/sbom-action@v0
               id: syft
               with:
-                format: json
-            - name: Rename Syft Output
-              run: mv sbom.json ${{ job.outputs.report_path }}
+                format: spdx-json
+                output-file: sbom.json
 
     secret_detection:
         name: Running Truffle-Hog on project
@@ -53,7 +48,9 @@ jobs:
               id: truffleHog
               uses: trufflesecurity/trufflehog@main
               with:
+                path: ./ 
                 exclude-paths: .git
+                extra_args: --json --log-level=-1
 
     sca:
         name: Running Grype [SCA] on project
@@ -145,7 +142,7 @@ jobs:
       steps:
         - name: Conditional Build Step
           run: |
-            if [[ "$BREAK_ON_FAILURE_FLAG" == "false" ]]; then
+            if [[ "$BREAK_ON_FAILURE_FLAG" == "true" ]]; then
               echo "BREAK_ON_FAILURE_FLAG is false, continuing only if all reports were successful."
               if [[ "${{ needs.sast.result }}" != "success" ]] || \
                 [[ "${{ needs.sbom_generator.result }}" != "success" ]] || \
@@ -155,7 +152,7 @@ jobs:
                 exit 0
               fi
             else
-              echo "BREAK_ON_FAILURE_FLAG is true, running regardless of reports."
+              echo "BREAK_ON_FAILURE_FLAG is false, running regardless of reports."
             fi
         - run: echo "PR approved, Running Build"
 
