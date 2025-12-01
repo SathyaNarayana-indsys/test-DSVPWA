@@ -139,17 +139,21 @@ jobs:
       needs: [PublishOutput, sast, sbom_generator, secret_detection, sca]
       env:
         FAILURE_FLAG: ${{ env.BREAK_ON_FAILURE_FLAG }}
-      if: >
-        ${{
-          env.BREAK_ON_FAILURE_FLAG == 'true' ||
-          (
-            needs.sast.result == 'success' &&
-            needs.sbom_generator.result == 'success' &&
-            needs.secret_detection.result == 'success' &&
-            needs.sca.result == 'success'
-          )
-        }}
       steps:
+        - name: Conditional Build Step
+          run: |
+            if [[ "$FAILURE_FLAG" == "false" ]]; then
+              echo "FAILURE_FLAG is false, continuing only if all reports were successful."
+              if [[ "${{ needs.sast.result }}" != "success" ]] || \
+                [[ "${{ needs.sbom_generator.result }}" != "success" ]] || \
+                [[ "${{ needs.secret_detection.result }}" != "success" ]] || \
+                [[ "${{ needs.sca.result }}" != "success" ]]; then
+                echo "One or more checks failed. Skipping build."
+                exit 0
+              fi
+            else
+              echo "FAILURE_FLAG is true, running regardless of reports."
+            fi
         - run: echo "PR approved, Running Build"
 
     #         - name: Checkout code
