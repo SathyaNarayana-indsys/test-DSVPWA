@@ -13,7 +13,7 @@ jobs:
     sast:
         name: Running SAST [BearerCLI] on project
         runs-on: ubuntu-latest 
-        output:
+        outputs:
           output_json: ${{ steps.sast.outputs.outputJson}}
         steps: 
           - name: Checkout code
@@ -33,7 +33,7 @@ jobs:
     sbom_generator:
         name: Running Syft [SBOM generator] on project
         runs-on: ubuntu-latest
-        output:
+        outputs:
           output_json: ${{ steps.sbom.outputs.outputJson}}
         steps:
             - name: Checkout code
@@ -105,12 +105,11 @@ jobs:
                 REPO_NAME: ${{ github.event.repository.name }}
                run: |
                   echo "Checking Repo's existance"
-
-                  if [-d "reports-repo/$REPO_NAME" ]; then
+                  if [ -d "reports-repo/$REPO_NAME" ]; then
                     echo "folder exists"
                   else
                     echo "creating the folders"
-                    mkdir -p report-repo/$REPO_NAME
+                    mkdir -p reports-repo/$REPO_NAME
                   fi
             -  name: copy, commit and push changes
                id: copy_reports
