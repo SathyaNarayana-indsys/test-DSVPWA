@@ -9,6 +9,6 @@ jobs:
     uses: Psycho-not0078/studious-octo-meme/.github/workflows/pythonSSH-build.yml@main
     with:
       repo_link: ${{ vars.REPORTS_REPO_LINK }} #sample test
-      break_on_failure: false # test test test
+      break_on_failure: false # test 
     secrets:
       REPORTS_REPO_PAT: ${{ secrets.REPORTS_REPO_PAT }}
