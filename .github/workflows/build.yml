@@ -8,6 +8,6 @@ jobs:
   security:
     uses: Psycho-not0078/studious-octo-meme/.github/workflows/pythonSSH-build.yml@main
     with:
-      repo_link: ${{ vars.REPORTS_REPO_LINK }} #sample test
+      repo_link: ${{ vars.REPORTS_REPO_LINK }} #sample test test
     secrets:
       REPORTS_REPO_PAT: ${{ secrets.REPORTS_REPO_PAT }}
