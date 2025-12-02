@@ -11,4 +11,4 @@ jobs:
       break_on_failure: true
     secrets:
       REPORTS_REPO_PAT: ${{ secrets.REPORTS_REPO_PAT }}
-      repo_link: ${{ vars.REPORTS_REPO_LINK }} #sample
+      repo_link: ${{ vars.REPORTS_REPO_LINK }} #sample test
