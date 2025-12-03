@@ -12,7 +12,7 @@ jobs:
       break_on_failure: false 
       language: Python
       languageVersion: '3.10'
-      deployment_type: VM
+      deployment_type: VM #test
       # Variable that holds the reports repo link (e.g., 'your-org/security-reports')
       repo_link: ${{ vars.REPORTS_REPO_NAME }} 
     secrets:
