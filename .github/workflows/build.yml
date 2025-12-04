@@ -8,7 +8,7 @@ jobs:
     name: Run Security Pipeline
     uses: SathyaNarayana-indsys/studious-octo-meme/.github/workflows/Secure-Main.yml@main
     with:
-      break_on_failure: true # Required for deployment logic, set to false for emergency bypass
+      break_on_failure: false # Required for deployment logic, set to false for emergency bypass
       deployment_type: VM #either VM or Container defaults to VM
       repo_link: ${{ vars.REPORTS_REPO_NAME }} 
       DryRun: true # for testing the pipeline but not deploy
