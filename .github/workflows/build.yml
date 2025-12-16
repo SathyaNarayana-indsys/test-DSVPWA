@@ -5,17 +5,12 @@ on:
 
 jobs:
   security_check:
-    environment: gcp
     name: Run Security Pipeline
+    environment: gcp  # This sets the environment context
     uses: SathyaNarayana-indsys/studious-octo-meme/.github/workflows/Secure-Main.yml@main
     with:
-      break_on_failure: false # Required for deployment logic, set to false for emergency bypass
-      deployment_type: VM #either VM or Container defaults to VM
+      break_on_failure: false
+      deployment_type: VM
       DryRun: false
       deploymentFolder: '/tmp/test/'
-
-    secrets:
-      REPORTS_REPO_PAT: ${{ secrets.REPORTS_REPO_PAT }}
-      USER: ${{ secrets.SSH_USER }}
-      HOST: ${{ secrets.SSH_HOSTNAME }}
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    secrets: inherit  # This passes ALL secrets from the calling context
