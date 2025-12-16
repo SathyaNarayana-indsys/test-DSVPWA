@@ -5,6 +5,7 @@ on:
 
 jobs:
   security_check:
+    environment: gcp
     name: Run Security Pipeline
     uses: SathyaNarayana-indsys/studious-octo-meme/.github/workflows/Secure-Main.yml@main
     with:
