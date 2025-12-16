@@ -6,7 +6,7 @@ on:
 jobs:
   security_check:
     name: Run Security Pipeline
-    uses: SathyaNarayana-indsys/studious-octo-meme/.github/workflows/Secure-Main.yml@main
+    uses: SathyaNarayana-indsys/studious-octo-meme/.github/Secure-Main.yml@main
     with:
       break_on_failure: false # Required for deployment logic, set to false for emergency bypass
       deployment_type: VM #either VM or Container defaults to VM
