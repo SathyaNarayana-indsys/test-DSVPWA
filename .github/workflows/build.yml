@@ -11,7 +11,7 @@ jobs:
       break_on_failure: false # Required for deployment logic, set to false for emergency bypass
       deployment_type: VM #either VM or Container defaults to VM
       DryRun: false
-      deploymentFolder: '/tmp/test'
+      deploymentFolder: '/tmp/test/'
 
     secrets:
       REPORTS_REPO_PAT: ${{ secrets.REPORTS_REPO_PAT }}
