@@ -6,6 +6,8 @@ on:
 jobs:
   security_check:
     name: Run Security Pipeline
+    environment:
+      name: ${{ github.ref_name }}
     uses: SathyaNarayana-indsys/studious-octo-meme/.github/workflows/Secure-Main.yml@main
     with:
       break_on_failure: false
@@ -13,4 +15,3 @@ jobs:
       DryRun: false
       deploymentFolder: '/tmp/test'
     secrets: inherit
-    env: main 
