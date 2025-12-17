@@ -11,6 +11,6 @@ jobs:
       break_on_failure: false
       deployment_type: VM
       DryRun: false
-      deploymentFolder: '/tmp/test/'
+      deploymentFolder: '/tmp/test'
       environmentName: ${{ github.ref_name }}
     secrets: inherit
