@@ -6,7 +6,6 @@ on:
 jobs:
   security_check:
     name: Run Security Pipeline
-    environment: gcp  # This sets the environment context
     uses: SathyaNarayana-indsys/studious-octo-meme/.github/workflows/Secure-Main.yml@main
     with:
       break_on_failure: false
