@@ -6,12 +6,11 @@ on:
 jobs:
   security_check:
     name: Run Security Pipeline
-    environment:
-      name: ${{ github.ref_name }}
     uses: SathyaNarayana-indsys/studious-octo-meme/.github/workflows/Secure-Main.yml@main
     with:
       break_on_failure: false
       deployment_type: VM
       DryRun: false
-      deploymentFolder: '/tmp/test'
+      deploymentFolder: '/tmp/test/'
+      environmentName: ${{ github.ref_name }}
     secrets: inherit
