@@ -12,5 +12,5 @@ jobs:
       break_on_failure: false
       deployment_type: VM
       DryRun: false
-      deploymentFolder: '/tmp/test/'
+      deploymentFolder: '/tmp/test'
     secrets: inherit  # This passes ALL secrets from the calling context
