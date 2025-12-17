@@ -13,4 +13,4 @@ jobs:
       DryRun: false
       deploymentFolder: '/tmp/test'
     secrets: inherit
-    environment: main 
+    env: main 
