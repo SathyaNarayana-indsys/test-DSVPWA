@@ -11,8 +11,9 @@ jobs:
       break_on_failure: false # Required for deployment logic, set to false for emergency bypass
       deployment_type: VM #either VM or Container defaults to VM
       # DryRun: false
-      deploymentFolder: '/tmp/test' #the desired folder for deployment
+      deploymentFolder: '/home/ssm-user/test' #the desired folder for deployment, which S
       envType: 'AWS' #AWS or GCP or OnPrem Location
+      repoUser: 'ssm-user'
       # executionRequired: 'false'
 
     # secrets:
