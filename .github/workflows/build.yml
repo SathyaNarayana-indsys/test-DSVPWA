@@ -10,7 +10,7 @@ jobs:
     with:
       break_on_failure: false # Required for deployment logic, set to false for emergency bypass
       deployment_type: VM #either VM or Container defaults to VM
-      # DryRun: false
+      DryRun: false
       deploymentFolder: '/tmp/test' #the desired folder for deployment
       envType: 'AWS' #AWS or GCP or OnPrem Location
       # executionRequired: 'false'
