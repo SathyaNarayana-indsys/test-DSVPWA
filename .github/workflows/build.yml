@@ -15,6 +15,7 @@ jobs:
       envType: 'AWS' #AWS or GCP or OnPrem Location
       # executionRequired: 'false'
 
+
     # secrets:
     #   REPORTS_REPO_PAT: ${{ secrets.REPORTS_REPO_PAT }}
     #   USER: ${{ secrets.SSH_USER }}
